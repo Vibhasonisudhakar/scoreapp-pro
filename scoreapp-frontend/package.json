@@ -1,0 +1,10 @@
+{
+  "name": "scoreapp-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "start": "npm --prefix ../frontendcd start",
+    "build": "npm --prefix ../frontendcd build",
+    "test": "npm --prefix ../frontendcd test"
+  }
+}
