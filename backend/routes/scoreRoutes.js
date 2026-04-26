@@ -1,5 +1,6 @@
 const express = require("express");
 const router = express.Router();
+const auth = require("../middleware/auth");
 const {
     calculateScore,
     getMethodology,
@@ -7,9 +8,9 @@ const {
     getDistribution,
 } = require("../controllers/scoreController");
 
-router.post("/calculate", calculateScore);
-router.get("/methodology", getMethodology);
-router.get("/report/scenarios", getScenarioReport);
-router.get("/distribution", getDistribution);
+router.post("/calculate", auth, calculateScore);
+router.get("/methodology", auth, getMethodology);
+router.get("/report/scenarios", auth, getScenarioReport);
+router.get("/distribution", auth, getDistribution);
 
 module.exports = router;

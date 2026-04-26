@@ -1,4 +1,10 @@
 {
+  "scripts": {
+    "start": "npm --prefix frontendcd start",
+    "start:frontend": "npm --prefix frontendcd start",
+    "start:backend": "npm --prefix backend start",
+    "build": "npm --prefix frontendcd run build"
+  },
   "dependencies": {
     "react-router-dom": "^7.14.2"
   }

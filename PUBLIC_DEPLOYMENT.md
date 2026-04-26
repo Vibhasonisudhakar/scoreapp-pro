@@ -1,49 +1,84 @@
 # Make ScoreApp Public
 
-This project can be made public with:
-- Backend on Render
-- Frontend on Netlify
+This repository is set up for a single public URL on Render. The backend now serves the built React app from the same domain, so others can use it without any local setup.
 
-## 1) Deploy Backend on Render
+## 1) Deploy on Render
 
-1. Push project to GitHub.
-2. In Render, create a new Web Service from your repo.
-3. Configure:
-   - Root Directory: backend
-   - Build Command: npm install
-   - Start Command: npm start
-4. Add environment variables:
-   - PORT=10000
-   - JWT_SECRET=any_secure_random_string
-   - CORS_ORIGIN=<your netlify site URL>
-   - MONGO_URI=<optional>
-5. Deploy and copy backend URL, for example:
-   - https://scoreapp-backend.onrender.com
+1. Push this repository to GitHub.
+2. In Render, create a new Web Service from the repository and use the root `render.yaml`.
+3. Let Render run the build and start commands from the blueprint.
+4. Set these environment variables in Render:
+   - `PORT=10000`
+   - `JWT_SECRET=<strong_random_secret>`
+   - `CORS_ORIGIN=*`
+   - `MONGO_URI=<your_mongodb_connection_string>`
+   - `FRONTEND_URL=<your_render_service_url>`
+   - `DEMO_NAME=Demo User`
+   - `DEMO_EMAIL=demo@scoreapp.com`
+   - `DEMO_PASSWORD=Score123!`
+   - `EXPOSE_RESET_TOKEN=false`
+   - `EMAIL_PROVIDER=custom` or one of `gmail`, `resend`, `sendgrid`
+   - `SMTP_HOST=<smtp_host>`
+   - `SMTP_PORT=587`
+   - `SMTP_SECURE=false`
+   - `SMTP_USER=<smtp_username>`
+   - `SMTP_PASS=<smtp_password>`
+   - `RESET_FROM_EMAIL=<sender_email_or_name_and_email>`
+   - `RESET_BRAND_NAME=ScoreApp`
+   - `RESET_SUPPORT_EMAIL=<support_email>`
 
-Health check:
-- Open backend URL in browser.
-- You should see: ScoreApp backend is running.
+Render builds the frontend during deployment, and the backend serves the compiled app from `/`.
 
-## 2) Deploy Frontend on Netlify
+## 2) Share the app
 
-1. In Netlify, create a new site from your repo.
-2. Configure:
-   - Base directory: frontendcd
-   - Build command: npm run build
-   - Publish directory: build
-3. Add environment variable:
-   - REACT_APP_API_BASE_URL=<your render backend URL>
-4. Deploy site.
+Share the Render service URL. Users can open it directly, register if MongoDB is connected, or use the demo login if you keep the demo env vars in place.
 
-The frontend will be public with a URL like:
-- https://your-scoreapp.netlify.app
+## 3) Forgot Password
 
-## 3) Final CORS Step
+- Reset links are built from `FRONTEND_URL`.
+- Set `FRONTEND_URL` to the Render URL so emailed links return users to the hosted app.
+- Keep `EXPOSE_RESET_TOKEN=false` in production.
 
-Set backend variable CORS_ORIGIN to the exact Netlify URL.
-Then redeploy backend once.
+## 4) Optional SMTP presets
 
-## 4) Share
+Gmail:
 
-Share the Netlify frontend URL with users.
-They can open the link and complete the ScoreApp assessment from any device.
+```env
+EMAIL_PROVIDER=gmail
+SMTP_USER=yourgmail@gmail.com
+SMTP_PASS=your_16_char_gmail_app_password
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+SMTP_SECURE=false
+RESET_FROM_EMAIL="ScoreApp <yourgmail@gmail.com>"
+```
+
+Resend:
+
+```env
+EMAIL_PROVIDER=resend
+SMTP_USER=resend
+SMTP_PASS=re_xxxxxxxxxxxxxxxxxxxxx
+SMTP_HOST=smtp.resend.com
+SMTP_PORT=587
+SMTP_SECURE=false
+RESET_FROM_EMAIL="ScoreApp <onboarding@resend.dev>"
+```
+
+SendGrid:
+
+```env
+EMAIL_PROVIDER=sendgrid
+SMTP_USER=apikey
+SMTP_PASS=SG.xxxxxxxxxxxxxxxxxxxxx
+SMTP_HOST=smtp.sendgrid.net
+SMTP_PORT=587
+SMTP_SECURE=false
+RESET_FROM_EMAIL="ScoreApp <verified-sender@yourdomain.com>"
+```
+
+## 5) Local development
+
+- Frontend: `frontendcd` with `REACT_APP_API_BASE_URL=http://localhost:5000`
+- Backend: `backend` with `PORT=5005`
+- The public deployment does not require Netlify.

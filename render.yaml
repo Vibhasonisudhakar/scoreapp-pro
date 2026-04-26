@@ -1,0 +1,47 @@
+services:
+  - type: web
+    name: scoreapp-backend
+    env: node
+    rootDir: backend
+    buildCommand: npm install && npm --prefix ../frontendcd install && npm --prefix ../frontendcd run build
+    startCommand: npm start
+    healthCheckPath: /api/health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 10000
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: "*"
+      - key: MONGO_URI
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: EMAIL_PROVIDER
+        value: custom
+      - key: SMTP_HOST
+        sync: false
+      - key: SMTP_PORT
+        value: 587
+      - key: SMTP_SECURE
+        value: false
+      - key: SMTP_USER
+        sync: false
+      - key: SMTP_PASS
+        sync: false
+      - key: RESET_FROM_EMAIL
+        sync: false
+      - key: RESET_BRAND_NAME
+        value: ScoreApp
+      - key: RESET_SUPPORT_EMAIL
+        sync: false
+      - key: EXPOSE_RESET_TOKEN
+        value: false
+      - key: DEMO_NAME
+        value: Demo User
+      - key: DEMO_EMAIL
+        value: demo@scoreapp.com
+      - key: DEMO_PASSWORD
+        value: Score123!

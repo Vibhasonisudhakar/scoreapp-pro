@@ -1,5 +1,8 @@
 node_modules
 .env
+backend/.env
+frontendcd/.env
 frontendcd/build
 frontendcd/node_modules
 backend/node_modules
+backend/mongodb+srvadminstrongpassword@clus.txt
