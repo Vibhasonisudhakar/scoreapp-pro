@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
+import * as XLSX from "xlsx";
 
 const apiBaseUrl = process.env.REACT_APP_API_BASE_URL || "";
 const api = `${apiBaseUrl.replace(/\/$/, "")}/api/score`;
@@ -112,29 +113,64 @@ function Dashboard({ token, onLogout }) {
     }
   };
 
-  const downloadSpreadsheet = () => {
+  const downloadSpreadsheet = (format = "xlsx") => {
     if (!methodology?.criteria?.length) {
       return;
     }
 
-    const rows = [
-      "criterion_id,criterion_title,weight,max_rating,example_rating,weighted_points",
+    const data = [
+      {
+        "Criterion ID": "criterion_id",
+        "Title": "criterion_title",
+        "Weight (%)": "weight_pct",
+        "Max Rating": "max_rating",
+        "Your Rating": "your_rating",
+        "Weighted Points": "weighted_points",
+      },
     ];
 
     methodology.criteria.forEach((criterion) => {
-      const exampleRating = responses[criterion.id] || 0;
-      const weightedPoints = ((exampleRating / 5) * criterion.weight * 100).toFixed(2);
-      rows.push(
-        `${criterion.id},${criterion.title},${criterion.weight},5,${exampleRating},${weightedPoints}`
-      );
+      const yourRating = responses[criterion.id] || 0;
+      const weightedPoints = ((yourRating / 5) * criterion.weight * 100).toFixed(2);
+      data.push({
+        "Criterion ID": criterion.id,
+        "Title": criterion.title,
+        "Weight (%)": (criterion.weight * 100).toFixed(1),
+        "Max Rating": 5,
+        "Your Rating": yourRating,
+        "Weighted Points": parseFloat(weightedPoints),
+      });
     });
 
-    const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "scoreapp_scoring_spreadsheet.csv";
-    link.click();
-    URL.revokeObjectURL(link.href);
+    if (format === "xlsx") {
+      const wb = XLSX.utils.book_new();
+      const ws = XLSX.utils.json_to_sheet(data);
+      ws["!cols"] = [
+        { wch: 15 },
+        { wch: 25 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 12 },
+        { wch: 15 },
+      ];
+      XLSX.utils.book_append_sheet(wb, ws, "Scoring Data");
+      XLSX.writeFile(wb, `scoreapp_assessment_${new Date().toISOString().split("T")[0]}.xlsx`);
+    } else {
+      const rows = [
+        "Criterion ID,Title,Weight (%),Max Rating,Your Rating,Weighted Points",
+      ];
+      data.slice(1).forEach((row) => {
+        rows.push(
+          `${row["Criterion ID"]},${row["Title"]},${row["Weight (%):"]},${row["Max Rating"]},${row["Your Rating"]},${row["Weighted Points"]}`
+        );
+      });
+      const blob = new Blob([rows.join("\n")], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `scoreapp_assessment_${new Date().toISOString().split("T")[0]}.csv`;
+      link.click();
+      URL.revokeObjectURL(link.href);
+    }
   };
 
   return (
@@ -280,8 +316,11 @@ function Dashboard({ token, onLogout }) {
               <button className="btn primary" onClick={runAssessment}>
                 Calculate Score
               </button>
-              <button className="btn ghost" onClick={downloadSpreadsheet}>
-                Download Scoring Spreadsheet
+              <button className="btn ghost" onClick={() => downloadSpreadsheet("xlsx")}>
+                ⬇ Download as Excel
+              </button>
+              <button className="btn ghost" onClick={() => downloadSpreadsheet("csv")}>
+                ⬇ Download as CSV
               </button>
             </div>
           </section>
